@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微信9宮格藏圖</title>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1d2330;
+      --text: #e8edf7;
+      --muted: #98a2b3;
+      --border: #2d3648;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      --radius: 16px;
+      --accent: #4ea1ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #0d1117 0%, #111827 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .panel {
+      background: rgba(23, 26, 33, 0.92);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+	.control-grid {
+	  display: grid;
+	  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	  gap: 12px;
+	  margin-top: 14px;
+	}
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+	
+	.wide-field {
+	  grid-column: span 2;
+	}
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input[type="file"],
+    input[type="number"],
+    select,
+    button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    button {
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-weight: 600;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: #466089;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1f6feb, #388bfd);
+      border-color: #3b82f6;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #238636, #2ea043);
+      border-color: #2ea043;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #2b313d, #394150);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+      border-color: #dc2626;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #111827;
+      color: var(--muted);
+      font-size: 14px;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+    }
+
+    .status.info { color: #bfdbfe; border-color: #1d4ed8; }
+    .status.success { color: #bbf7d0; border-color: #15803d; }
+    .status.error { color: #fecaca; border-color: #b91c1c; }
+
+    .small-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+	.upload-summaries {
+	  display: grid;
+	  grid-template-columns: 1fr;
+	  gap: 18px;
+	  margin-top: 12px;
+	}
+
+    .summary-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      min-height: 180px;
+    }
+
+    .summary-box h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .count {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .center-thumb-wrap {
+      width: 100%;
+      max-width: 220px;
+    }
+
+    .center-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #000;
+    }
+
+    .thumb-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      gap: 10px;
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .thumb {
+      background: #0b1220;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      position: relative;
+      user-select: none;
+    }
+
+    .thumb.dragging {
+      opacity: 0.45;
+      transform: scale(0.98);
+    }
+
+    .thumb.drag-over {
+      outline: 2px solid #56b6ff;
+      outline-offset: 1px;
+    }
+
+    .thumb img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      border-radius: 8px;
+      background: #000;
+    }
+
+    .thumb-index {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .thumb-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .thumb-actions button {
+      padding: 6px 0;
+      min-width: 0;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .thumb-name {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .results-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .results-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .center-preview-shell {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .preview-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .preview-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .preview-stage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      padding: 6px;
+    }
+
+	#centerPreviewDisplay {
+	  width: 100%;
+	  height: auto;
+	  display: block;
+	  background: #000;
+	  border-radius: 12px;
+	  border: 1px solid #2a3242;
+	}
+
+    .outputs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .output-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px;
+    }
+
+    .output-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .output-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 10px;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1200px) {
+      .grid-2,
+      .upload-summaries {
+        grid-template-columns: 1fr;
+      }
+
+      .control-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+
+      .btn-row {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .outputs-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+
+    @media (max-width: 800px) {
+      body { padding: 14px; }
+
+      .control-grid,
+      .btn-row,
+      .outputs-grid {
+        grid-template-columns: 1fr;
+      }
+
+	  .control-grid > .field{
+		grid-column: 1 / -1;
+	  }
+
+      .thumb-list {
+        grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>微信9宮格藏圖 WeChat Moments Grid Image Generator</h1>
+    <p class="subtitle">
+  	上傳 1 張主照片及另外 <strong><span id="targetOthersTextZh">54</span></strong> 張要隱藏的照片。程式會將主照片分割成 9 個部分，調整其餘隱藏照片的大小，建立並下載最終的 9 張拼貼而成的長圖片。<br>
+	Upload <strong>1 Center Photo </strong> and <strong><span id="targetOthersText">54</span></strong> other photos. 
+  	The app splits the Center Photo into 9 pieces,normalizes the other photos, builds 9 stacked images, and lets you download the 9 final stacked files.
+    </p>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="field">
+          <label for="centerInput">主照片Center Photo (exactly 1)</label>
+          <input id="centerInput" type="file" accept="image/*" />
+        </div>
+
+        <div class="field" style="margin-top: 14px;">
+          <label for="othersInput">隱藏照片Hidden photos (<span id="targetOthersLabel">exactly 54</span>, used in current order)</label>
+          <input id="othersInput" type="file" accept="image/*" multiple />
+        </div>
+
+        <div class="control-grid">
+          <div class="field">
+            <label for="tileW">寬度 Tile width</label>
+            <input id="tileW" type="number" min="100" step="10" value="2160" />
+          </div>
+
+          <div class="field">
+            <label for="tileH">高度 Tile height</label>
+            <input id="tileH" type="number" min="100" step="10" value="2160" />
+          </div>
+          
+		
+		<div class="field wide-field">
+		  <label for="photoMode">長圖模式 Stack Mode</label>
+		  <select id="photoMode">
+			<option value="36">36 Photos (2 top + 2 bottom)</option>
+			<option value="54" selected>54 Photos (3 top + 3 bottom)</option>
+			<option value="72">72 Photos (4 top + 4 bottom)</option>
+		  </select>
+		 </div>
+		 </div>
+		
+		
+
+        <div class="btn-row">
+          <button id="generateBtn" class="btn-primary">Generate 9 images</button>
+          <button id="downloadAllBtn" class="btn-success" disabled>Download ZIP</button>
+          <button id="downloadEachBtn" class="btn-secondary" disabled>Download all individually</button>
+          <button id="clearBtn" class="btn-danger">Clear</button>
+        </div>
+		
+
+        <div id="status" class="status info">Select files to begin.</div>
+
+        <div class="small-note">
+          Rules used:
+          <br>- Center Photo is padded to square with <strong>white</strong>, resized to 3×3 tiles, then split into 9.
+          <br>- Other photos are rotated to landscape if portrait, then contained in the tile size with <strong>black</strong> padding.
+          <br>- Each final image is stacked as <strong id="stackStructureText">3 photos + 1 center tile + 3 photos</strong>.
+        </div>
+      </div>
+	  
+
+      <div class="panel">
+		<div class="upload-summaries">
+		  <div class="summary-box">
+			<h3>隱藏照片Hidden Photos</h3>
+			<div id="centerCount" class="count">主照片 Center Photo: No file selected</div>
+			<div id="othersCount" class="count">0 / 54 selected</div>
+			<div class="count" style="margin-top:-4px;">
+			  可透過拖放重新排序，或使用 ← / → 調整順序。<br>
+			  Reorder by <strong>drag & drop</strong> or use <strong>← / →</strong>.
+			</div>
+			<div id="othersPreview" class="thumb-list"></div>
+		  </div>
+		</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="results-header">
+        <div>
+          <h2>預覽 Result Preview</h2>
+        </div>
+      </div>
+
+      <div id="resultsEmpty" class="empty-state">
+        No generated results yet.
+      </div>
+
+      <div id="resultsBody" class="hidden">
+        <div class="center-preview-shell">
+          <div class="preview-title">Center-only Preview</div>
+          <div class="preview-desc">
+            Pixel-exact reconstruction from the 9 center tiles extracted from the 9 final stacked outputs.
+          </div>
+          <div class="preview-stage">
+            <canvas id="centerPreviewDisplay"></canvas>
+          </div>
+        </div>
+
+        <div id="outputsGrid" class="outputs-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const els = {
+	centerInput: document.getElementById('centerInput'),
+	othersInput: document.getElementById('othersInput'),
+	tileW: document.getElementById('tileW'),
+	tileH: document.getElementById('tileH'),
+	photoMode: document.getElementById('photoMode'),
+	targetOthersText: document.getElementById('targetOthersText'),
+	targetOthersTextZh: document.getElementById('targetOthersTextZh'),
+	targetOthersLabel: document.getElementById('targetOthersLabel'),
+	stackStructureText: document.getElementById('stackStructureText'),
+	generateBtn: document.getElementById('generateBtn'),
+      downloadAllBtn: document.getElementById('downloadAllBtn'),
+      downloadEachBtn: document.getElementById('downloadEachBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      status: document.getElementById('status'),
+
+      centerCount: document.getElementById('centerCount'),
+      othersCount: document.getElementById('othersCount'),
+      centerPreviewImg: document.getElementById('centerPreviewImg'),
+      othersPreview: document.getElementById('othersPreview'),
+
+      resultsEmpty: document.getElementById('resultsEmpty'),
+      resultsBody: document.getElementById('resultsBody'),
+      centerPreviewDisplay: document.getElementById('centerPreviewDisplay'),
+      outputsGrid: document.getElementById('outputsGrid'),
+    };
+
+	function getModeConfig() {
+	  const mode = Number(els.photoMode.value);
+	  if (mode === 36) return { total: 36, perStack: 4, top: 2, bottom: 2, heightMultiplier: 5 };
+	  if (mode === 72) return { total: 72, perStack: 8, top: 4, bottom: 4, heightMultiplier: 9 };
+	  return { total: 54, perStack: 6, top: 3, bottom: 3, heightMultiplier: 7 }; // default 54
+	}
+
+	function updateModeTexts() {
+	  const config = getModeConfig();
+	  els.targetOthersText.textContent = config.total;
+	  targetOthersTextZh.textContent = config.total;
+	  els.targetOthersLabel.textContent = `exactly ${config.total}`;
+	  els.stackStructureText.textContent = `${config.top} photos + 1 center tile + ${config.bottom} photos`;
+	  els.othersCount.textContent = `${state.otherItems.length} / ${config.total} selected`;
+	  updateButtons();
+	}
+
+    const state = {
+      centerFile: null,
+      centerThumb: '',
+      otherItems: [], // { id, file, thumb }
+      busy: false,
+      thumbJobId: 0,
+      dragIndex: null,
+      resultFiles: [], // { blob, filename, outputIndex, centerTileIndex, otherStart, otherEnd, sizeText }
+      centerPreviewCanvas: null,
+    };
+
+    function setStatus(message, type = 'info') {
+      els.status.textContent = message;
+      els.status.className = `status ${type}`;
+    }
+
+    function makeId(prefix = 'id') {
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function clearGeneratedOutputsOnly(silent = false) {
+      state.resultFiles = [];
+      state.centerPreviewCanvas = null;
+      renderResults();
+      updateButtons();
+      if (!silent) setStatus('Settings or photo order changed. Please regenerate outputs.', 'info');
+    }
+
+    function validateInputs() {
+      const config = getModeConfig();
+      if (!state.centerFile) return 'Please select 1 Center Photo.';
+      if (state.otherItems.length !== config.total) return `Please select exactly ${config.total} other photos. Current: ${state.otherItems.length}.`;
+      const tileW = Number(els.tileW.value);
+      const tileH = Number(els.tileH.value);
+      if (!Number.isFinite(tileW) || tileW < 100) return 'Tile width must be at least 100.';
+      if (!Number.isFinite(tileH) || tileH < 100) return 'Tile height must be at least 100.';
+      return '';
+    }
+
+    function updateButtons() {
+      const inputError = validateInputs();
+      els.generateBtn.disabled = !!inputError || state.busy;
+      els.downloadAllBtn.disabled = state.busy || state.resultFiles.length === 0;
+      els.downloadEachBtn.disabled = state.busy || state.resultFiles.length === 0;
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return '';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      let i = 0;
+      let val = bytes;
+      while (val >= 1024 && i < units.length - 1) {
+        val /= 1024;
+        i++;
+      }
+      return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
+    }
+
+    function createCanvas(w, h) {
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      return canvas;
+    }
+
+    function getCanvasContext(canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      return ctx;
+    }
+
+    function sourceWidth(src) {
+      return src.naturalWidth || src.videoWidth || src.width;
+    }
+
+    function sourceHeight(src) {
+      return src.naturalHeight || src.videoHeight || src.height;
+    }
+
+    function nextFrame() {
+      return new Promise(resolve => requestAnimationFrame(resolve));
+    }
+
+    function loadImageFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error(`Failed to load image: ${file.name}`));
+        };
+
+        img.src = url;
+      });
+    }
+
+    function drawContain(ctx, src, targetW, targetH, bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      const sw = sourceWidth(src);
+      const sh = sourceHeight(src);
+      const scale = Math.min(targetW / sw, targetH / sh);
+      const drawW = sw * scale;
+      const drawH = sh * scale;
+      const dx = (targetW - drawW) / 2;
+      const dy = (targetH - drawH) / 2;
+
+      ctx.drawImage(src, dx, dy, drawW, drawH);
+    }
+
+    function drawCover(ctx, src, targetW, targetH, bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      const sw = sourceWidth(src);
+      const sh = sourceHeight(src);
+      const scale = Math.max(targetW / sw, targetH / sh);
+      const drawW = sw * scale;
+      const drawH = sh * scale;
+      const dx = (targetW - drawW) / 2;
+      const dy = (targetH - drawH) / 2;
+
+      ctx.drawImage(src, dx, dy, drawW, drawH);
+    }
+
+    function rotatePortraitToLandscapeIfNeeded(src) {
+      const sw = sourceWidth(src);
+      const sh = sourceHeight(src);
+
+      if (sh <= sw) return src;
+
+      const canvas = createCanvas(sh, sw);
+      const ctx = getCanvasContext(canvas);
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(src, -sw / 2, -sh / 2, sw, sh);
+      return canvas;
+    }
+
+    function splitCenterImage(centerImg, tileW, tileH) {
+      const sw = sourceWidth(centerImg);
+      const sh = sourceHeight(centerImg);
+      const squareSize = Math.max(sw, sh);
+
+      const squareCanvas = createCanvas(squareSize, squareSize);
+      const squareCtx = getCanvasContext(squareCanvas);
+      squareCtx.fillStyle = '#ffffff';
+      squareCtx.fillRect(0, 0, squareSize, squareSize);
+
+      const dx = (squareSize - sw) / 2;
+      const dy = (squareSize - sh) / 2;
+      squareCtx.drawImage(centerImg, dx, dy, sw, sh);
+
+      const resizedCanvas = createCanvas(tileW * 3, tileH * 3);
+      const resizedCtx = getCanvasContext(resizedCanvas);
+      resizedCtx.drawImage(squareCanvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+
+      const tiles = [];
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const tile = createCanvas(tileW, tileH);
+          const tctx = getCanvasContext(tile);
+          tctx.drawImage(
+            resizedCanvas,
+            col * tileW, row * tileH, tileW, tileH,
+            0, 0, tileW, tileH
+          );
+          tiles.push(tile);
+        }
+      }
+      return tiles;
+    }
+
+    function prepareOtherPhoto(img, tileW, tileH) {
+      const normalized = rotatePortraitToLandscapeIfNeeded(img);
+      const canvas = createCanvas(tileW, tileH);
+      const ctx = getCanvasContext(canvas);
+      drawContain(ctx, normalized, tileW, tileH, '#000000');
+      return canvas;
+    }
+
+	function buildStack(groupPhotos, middleTile, tileW, tileH, config) {
+	  const canvas = createCanvas(tileW, tileH * config.heightMultiplier);
+	  const ctx = getCanvasContext(canvas);
+	  const ordered = [];
+	  for (let i = 0; i < config.top; i++) ordered.push(groupPhotos[i]);
+	  ordered.push(middleTile);
+	  for (let i = 0; i < config.bottom; i++) ordered.push(groupPhotos[config.top + i]);
+	  
+	  ordered.forEach((tile, i) => {
+	    ctx.drawImage(tile, 0, i * tileH, tileW, tileH);
+	  });
+	  return canvas;
+	}
+
+	function extractCenterTileFromStack(stackCanvas, tileW, tileH, config) {
+	  const tile = createCanvas(tileW, tileH);
+	  const ctx = getCanvasContext(tile);
+	  ctx.drawImage(
+	    stackCanvas,
+	    0, tileH * config.top, tileW, tileH,
+	    0, 0, tileW, tileH
+	  );
+	  return tile;
+	}
+
+    function buildCombinedCenterPreview(centerTiles, tileW, tileH) {
+      const canvas = createCanvas(tileW * 3, tileH * 3);
+      const ctx = getCanvasContext(canvas);
+
+      centerTiles.forEach((tile, i) => {
+        const row = Math.floor(i / 3);
+        const col = i % 3;
+        ctx.drawImage(tile, col * tileW, row * tileH, tileW, tileH);
+      });
+
+      return canvas;
+    }
+
+	function getExportOptions() {
+	return { mime: 'image/jpeg', ext: 'jpg', quality: 1 };
+	}
+
+    function canvasToBlob(canvas, mime, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          if (!blob) {
+            reject(new Error('Failed to export image.'));
+            return;
+          }
+          resolve(blob);
+        }, mime, quality);
+      });
+    }
+
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    async function createThumbnailDataUrl(file, size = 120) {
+      const img = await loadImageFromFile(file);
+      const canvas = createCanvas(size, size);
+      const ctx = getCanvasContext(canvas);
+      drawCover(ctx, img, size, size, '#000000');
+      return canvas.toDataURL('image/jpeg', 0.72);
+    }
+
+    async function generateSelectionThumbnails() {
+	  const jobId = ++state.thumbJobId;
+
+      for (let i = 0; i < state.otherItems.length; i++) {
+        const item = state.otherItems[i];
+        if (item.thumb) continue;
+
+        try {
+          item.thumb = await createThumbnailDataUrl(item.file, 120);
+        } catch (err) {
+          console.error(err);
+          item.thumb = '';
+        }
+
+        if (jobId !== state.thumbJobId) return;
+
+        if (i % 6 === 0 || i === state.otherItems.length - 1) {
+          renderSelections();
+          await nextFrame();
+        }
+      }
+    }
+
+    function moveOtherItem(from, to) {
+      if (from === to) return;
+      if (from < 0 || to < 0 || from >= state.otherItems.length || to >= state.otherItems.length) return;
+
+      const arr = state.otherItems;
+      const [item] = arr.splice(from, 1);
+      arr.splice(to, 0, item);
+
+      renderSelections();
+      clearGeneratedOutputsOnly(true);
+      setStatus('Photo order changed. Please regenerate outputs.', 'info');
+      updateButtons();
+    }
+
+    function renderSelections() {
+		if (state.centerFile) {
+		  els.centerCount.textContent = `主照片 Center Photo: ${state.centerFile.name}`;
+		} else {
+		  els.centerCount.textContent = '主照片 Center Photo: No file selected';
+		}
+
+      const config = getModeConfig();
+      els.othersCount.textContent = `${state.otherItems.length} / ${config.total} selected`;
+      els.othersPreview.innerHTML = '';
+
+      state.otherItems.forEach((item, index) => {
+        const box = document.createElement('div');
+        box.className = 'thumb';
+        box.draggable = true;
+        box.dataset.index = String(index);
+
+        const img = document.createElement('img');
+        img.alt = item.file.name;
+        if (item.thumb) {
+          img.src = item.thumb;
+        } else {
+          img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+              <rect width="100%" height="100%" fill="#0b1220"/>
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#98a2b3" font-size="12">loading...</text>
+            </svg>
+          `);
+        }
+
+        const indexBadge = document.createElement('div');
+        indexBadge.className = 'thumb-index';
+        indexBadge.textContent = String(index + 1);
+
+        const actions = document.createElement('div');
+        actions.className = 'thumb-actions';
+
+        const leftBtn = document.createElement('button');
+        leftBtn.className = 'btn-secondary';
+        leftBtn.textContent = '←';
+        leftBtn.disabled = index === 0;
+        leftBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          moveOtherItem(index, index - 1);
+        });
+
+        const rightBtn = document.createElement('button');
+        rightBtn.className = 'btn-secondary';
+        rightBtn.textContent = '→';
+        rightBtn.disabled = index === state.otherItems.length - 1;
+        rightBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          moveOtherItem(index, index + 1);
+        });
+
+        actions.appendChild(leftBtn);
+        actions.appendChild(rightBtn);
+
+        const name = document.createElement('div');
+        name.className = 'thumb-name';
+        name.title = item.file.name;
+        name.textContent = item.file.name;
+
+        box.appendChild(img);
+        box.appendChild(indexBadge);
+        box.appendChild(actions);
+        box.appendChild(name);
+
+        box.addEventListener('dragstart', (e) => {
+          state.dragIndex = index;
+          box.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', String(index));
+        });
+
+        box.addEventListener('dragend', () => {
+          box.classList.remove('dragging');
+          state.dragIndex = null;
+          document.querySelectorAll('.thumb.drag-over').forEach(el => el.classList.remove('drag-over'));
+        });
+
+        box.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          box.classList.add('drag-over');
+        });
+
+        box.addEventListener('dragleave', () => {
+          box.classList.remove('drag-over');
+        });
+
+        box.addEventListener('drop', (e) => {
+          e.preventDefault();
+          box.classList.remove('drag-over');
+          const from = state.dragIndex ?? Number(e.dataTransfer.getData('text/plain'));
+          const to = index;
+          moveOtherItem(from, to);
+        });
+
+        els.othersPreview.appendChild(box);
+      });
+
+      updateButtons();
+    }
+
+    function renderResults() {
+      const hasResults = state.resultFiles.length > 0 && state.centerPreviewCanvas;
+      els.resultsEmpty.classList.toggle('hidden', hasResults);
+      els.resultsBody.classList.toggle('hidden', !hasResults);
+
+      if (!hasResults) {
+        els.outputsGrid.innerHTML = '';
+        const ctx = els.centerPreviewDisplay.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, els.centerPreviewDisplay.width || 1, els.centerPreviewDisplay.height || 1);
+        return;
+      }
+
+      const src = state.centerPreviewCanvas;
+
+	  els.centerPreviewDisplay.width = src.width;
+	  els.centerPreviewDisplay.height = src.height;
+
+	  const pctx = getCanvasContext(els.centerPreviewDisplay);
+	  pctx.clearRect(0, 0, src.width, src.height);
+	  pctx.drawImage(src, 0, 0);
+
+      els.outputsGrid.innerHTML = '';
+
+      state.resultFiles.forEach((fileObj, i) => {
+        const card = document.createElement('div');
+        card.className = 'output-card';
+
+        const title = document.createElement('div');
+        title.className = 'output-title';
+        title.textContent = `Output ${i + 1}`;
+
+        const meta = document.createElement('div');
+        meta.className = 'output-meta';
+        meta.innerHTML = `
+          Center tile: <strong>#${fileObj.centerTileIndex}</strong><br>
+          Ordered photos: <strong>#${fileObj.otherStart} - #${fileObj.otherEnd}</strong><br>
+          File size: <strong>${fileObj.sizeText}</strong>
+        `;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-secondary';
+        btn.textContent = 'Download';
+        btn.addEventListener('click', () => {
+          triggerDownload(fileObj.blob, fileObj.filename);
+        });
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(btn);
+        els.outputsGrid.appendChild(card);
+      });
+    }
+
+    async function downloadAllIndividually() {
+      if (!state.resultFiles.length) return;
+
+      state.busy = true;
+      updateButtons();
+
+      try {
+        for (let i = 0; i < state.resultFiles.length; i++) {
+          setStatus(`Downloading ${i + 1} / ${state.resultFiles.length}...`, 'info');
+          triggerDownload(state.resultFiles[i].blob, state.resultFiles[i].filename);
+          await new Promise(r => setTimeout(r, 250));
+        }
+        setStatus('All individual downloads started.', 'success');
+      } catch (err) {
+        console.error(err);
+        setStatus(`Download failed: ${err.message}`, 'error');
+      } finally {
+        state.busy = false;
+        updateButtons();
+      }
+    }
+
+    async function downloadAllZip() {
+      if (!state.resultFiles.length) return;
+
+      if (typeof JSZip === 'undefined') {
+        setStatus('JSZip failed to load. Cannot create ZIP.', 'error');
+        return;
+      }
+
+      state.busy = true;
+      updateButtons();
+
+      try {
+        const zip = new JSZip();
+
+        for (let i = 0; i < state.resultFiles.length; i++) {
+          setStatus(`Adding ${i + 1} / ${state.resultFiles.length} to ZIP...`, 'info');
+          zip.file(state.resultFiles[i].filename, state.resultFiles[i].blob);
+          await nextFrame();
+        }
+
+        setStatus('Generating ZIP...', 'info');
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        triggerDownload(zipBlob, 'wechat-moments-9-images.zip');
+        setStatus('ZIP downloaded.', 'success');
+      } catch (err) {
+        console.error(err);
+        setStatus(`ZIP download failed: ${err.message}`, 'error');
+      } finally {
+        state.busy = false;
+        updateButtons();
+      }
+    }
+
+    async function generate() {
+      const error = validateInputs();
+      if (error) {
+        setStatus(error, 'error');
+        updateButtons();
+        return;
+      }
+
+      state.busy = true;
+      state.resultFiles = [];
+      state.centerPreviewCanvas = null;
+      renderResults();
+      updateButtons();
+
+      try {
+        const tileW = Number(els.tileW.value);
+        const tileH = Number(els.tileH.value);
+        const { mime, ext, quality } = getExportOptions();
+
+        setStatus('Loading Center Photo...', 'info');
+        await nextFrame();
+        const centerImg = await loadImageFromFile(state.centerFile);
+
+        setStatus('Splitting Center Photo into 9 tiles...', 'info');
+        await nextFrame();
+        const centerTiles = splitCenterImage(centerImg, tileW, tileH);
+
+        const centerExtractedTiles = [];
+        const resultFiles = [];
+
+	  const config = getModeConfig();
+	  for (let groupIndex = 0; groupIndex < 9; groupIndex++) {
+	    const start = groupIndex * config.perStack;
+	    const end = start + config.perStack;
+          const groupItems = state.otherItems.slice(start, end);
+
+          setStatus(`Processing output ${groupIndex + 1} / 9...`, 'info');
+          await nextFrame();
+
+          const preparedOthers = [];
+          for (let j = 0; j < groupItems.length; j++) {
+	    const fileIndex = start + j + 1;
+	    setStatus(`Processing output ${groupIndex + 1} / 9 · other photo ${fileIndex} / ${config.total}...`, 'info');
+            await nextFrame();
+            const img = await loadImageFromFile(groupItems[j].file);
+            preparedOthers.push(prepareOtherPhoto(img, tileW, tileH));
+          }
+
+	const stackCanvas = buildStack(preparedOthers, centerTiles[groupIndex], tileW, tileH, config);
+	// Extract actual middle tile from final generated stack
+	const extractedCenterTile = extractCenterTileFromStack(stackCanvas, tileW, tileH, config);
+	centerExtractedTiles.push(extractedCenterTile);
+
+          const blob = await canvasToBlob(stackCanvas, mime, quality);
+          resultFiles.push({
+            blob,
+            filename: `moment-${String(groupIndex + 1).padStart(2, '0')}.${ext}`,
+            outputIndex: groupIndex + 1,
+            centerTileIndex: groupIndex + 1,
+            otherStart: start + 1,
+            otherEnd: end,
+            sizeText: formatBytes(blob.size)
+          });
+
+          await nextFrame();
+        }
+
+        state.centerPreviewCanvas = buildCombinedCenterPreview(centerExtractedTiles, tileW, tileH);
+        state.resultFiles = resultFiles;
+
+        renderResults();
+        setStatus('Done. 9 images generated successfully.', 'success');
+      } catch (err) {
+        console.error(err);
+        state.resultFiles = [];
+        state.centerPreviewCanvas = null;
+        renderResults();
+        setStatus(`Generation failed: ${err.message}`, 'error');
+      } finally {
+        state.busy = false;
+        updateButtons();
+      }
+    }
+
+    function clearAll() {
+      state.centerFile = null;
+      state.centerThumb = '';
+      state.otherItems = [];
+      state.busy = false;
+      state.thumbJobId++;
+      state.dragIndex = null;
+      state.resultFiles = [];
+      state.centerPreviewCanvas = null;
+
+      els.centerInput.value = '';
+      els.othersInput.value = '';
+      els.tileW.value = '2160';
+      els.tileH.value = '2160';
+
+      renderSelections();
+      renderResults();
+      setStatus('Cleared. Select files to begin.', 'info');
+      updateButtons();
+    }
+
+    els.centerInput.addEventListener('change', async () => {
+      state.centerFile = els.centerInput.files[0] || null;
+      state.centerThumb = '';
+      clearGeneratedOutputsOnly(true);
+      renderSelections();
+
+      const err = validateInputs();
+      setStatus(err || 'Center Photo selected.', err ? 'error' : 'info');
+      updateButtons();
+
+      await generateSelectionThumbnails();
+      renderSelections();
+    });
+    
+    els.photoMode.addEventListener('change', () => {
+	  clearGeneratedOutputsOnly(true);
+	  updateModeTexts();
+	  renderSelections();
+	  setStatus(`Mode changed to ${getModeConfig().total} photos. Please select files and regenerate.`, 'info');
+	});
+
+    els.othersInput.addEventListener('change', async () => {
+      state.otherItems = Array.from(els.othersInput.files || []).map(file => ({
+        id: makeId('other'),
+        file,
+        thumb: ''
+      }));
+
+      clearGeneratedOutputsOnly(true);
+      renderSelections();
+
+      const err = validateInputs();
+      setStatus(err || 'Other photos selected.', err ? 'error' : 'info');
+      updateButtons();
+
+      await generateSelectionThumbnails();
+      renderSelections();
+    });
+
+    els.generateBtn.addEventListener('click', generate);
+    els.downloadAllBtn.addEventListener('click', downloadAllZip);
+    els.downloadEachBtn.addEventListener('click', downloadAllIndividually);
+    els.clearBtn.addEventListener('click', clearAll);
+
+    [els.tileW, els.tileH].forEach(input => {
+      input.addEventListener('input', () => {
+        if (state.resultFiles.length > 0) {
+          clearGeneratedOutputsOnly(true);
+          setStatus('Settings changed. Please regenerate outputs.', 'info');
+        } else {
+          const err = validateInputs();
+          setStatus(err || 'Settings updated.', err ? 'error' : 'info');
+        }
+        updateButtons();
+      });
+
+      input.addEventListener('change', () => {
+        if (state.resultFiles.length > 0) {
+          clearGeneratedOutputsOnly(true);
+          setStatus('Settings changed. Please regenerate outputs.', 'info');
+        }
+        updateButtons();
+      });
+    });
+    
+    updateModeTexts();
+    renderSelections();
+    renderResults();
+    updateButtons();
+  </script>
+</body>
+</html>
